@@ -1,0 +1,143 @@
+---
+title: "EDA Assignment"
+author: "Polina Sorokina"
+date: "February 11, 2019"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    df_print: paged
+    code_folding: hide
+---
+
+```{r setup, include= FALSE, echo = TRUE, warning=FALSE}
+
+library(dplyr)
+library(ggplot2)
+bikeVendors <- read.csv("bikeVendors.csv")
+
+```
+
+# Introduction and Data Description
+
+For this reasearch, I was analyzing the Bike Vendor Data Set. The data consisted of 97 rows or observations and 35 columns or variables. I primarily used "dplyr" and "ggplot2" packages.
+
+
+
+# Research Questions
+
+Some of the research questions that this analysis will try to answer are: 
+
+* Which bike models are the most and least expensive in both Mountain and Road Category?
+* How many bikes of each category are in the data set under category2?
+* On average, bikes with which type of frame are more expensive?
+
+
+
+
+# Data Exploration
+
+First steps in analyzing the data set was to give myself a glims of the data set using the "head" function. The function helped to identify which type of data each column belonged to. First 4 columns were Characters, fifth "Price" was an Integral, etc. 
+
+
+```{r}
+head(bikeVendors)
+```
+
+
+The data set appeared to be normal, without any missing values. Which was confirmed by using a sum formula, which added together all missing values, giving the total of `r sum(is.na(bikeVendors))`. 
+
+
+Next, I performed a simple summary analysis of the "Price" column.
+
+```{r}
+summary(bikeVendors$price)
+```
+
+That formula has given me a basic statistic of the column. With lowest price being 415; highest 12,790; median 3,200; mean 3,954; 1st quartile 1,950; 3rd quartile 5,330. 
+
+Next, I performed a deeper analysis to answer my research questions:
+
+
+
+### Which bike models are the most expensive and the cheapest in both Mountain and Road Category?
+
+To answer the first question, I have decided to create a graph chart of Bike Models and their Prices. 
+
+```{r}
+ggplot(bikeVendors, aes(x=model, y=price)) + geom_bar(fill="steelblue", stat = "identity") + labs(title = "Figure 1 : Price Graph of All Bikes")
+
+```
+
+The graph appeared to be very crowded and the model names were unreadable. 
+However, this graph helped me identify that the top priced bikes are over $10,000. Therefore, I have subseted the data set to include the four most expensive bikes only, and then repeated the analysis.
+
+
+```{r}
+expensive_bikes <- bikeVendors %>% filter(price > 10000)
+
+ggplot(expensive_bikes, aes(x=model, y=price)) + geom_bar(fill="steelblue", stat = "identity") + geom_text(aes(label=price)) + labs(title = "Figure 2: Price Graph of the Most Expensive Bikes")
+```
+
+As you can see on the graph, the top two most expensive bike models are: "Scalpel-Si Black Inc." and "Supersix Evo Black Inc.", both are priced at $12,790. 
+
+I performed the same steps to identify the least expensive bikes in the market.
+
+```{r}
+cheap_bikes <- bikeVendors %>% filter(price < 600)
+
+ggplot(cheap_bikes, aes(x=model, y=price)) + geom_bar(fill="steelblue", stat = "identity") + geom_text(aes(label=price)) + labs(title = "Figure 3: Price Graph of the Least Expensive Bikes")
+```
+
+The above graph has answered the second part of my first research question - the lease expensive bike on the market is "Catalyst 4" at $415. 
+
+Answering this question made me curious, which categories do these bikes belong to. To answer that question, I have created a table with those three bike models and the variables I was interested in.
+
+```{r}
+bikeVendors %>% filter(model == "Supersix Evo Black Inc." | model=="Supersix Evo Hi-Mod Team" | model=="Catalyst 4") %>% subset(select=c(model,category1,category2,frame))
+```
+
+It has appeared that the most expensive bikes belong to a Road Category and are of "Elite Road" style. Their fram is Carbon. The chep bike's frame is Aluminum, it is Mountain category and is"Sport Style"
+
+
+
+
+
+###  How many bikes of each category are in the data set under category2?
+
+To identify that, I have created a simple table: 
+
+```{r}
+ bikeVendors %>% group_by(category2) %>% summarise(n=n())
+```
+
+Which showed that the data frame consists of 21 Elite Road Bikes; 19 Cross Country Race bikes; 16 Endurance Road bikes, etc.
+
+
+
+
+### On average, bikes with which type of frame are more expensive?
+
+To answer the last question, I subseted the data set to show a frame type and the price average only. After that, I've created another boxplot for better visualization.
+
+```{r}
+
+average_frame <- bikeVendors %>% group_by(frame) %>% summarise(mean = mean(price))
+
+ggplot(average_frame, aes(frame, mean)) + geom_bar(fill="steelblue", stat = "identity") + labs(title = "Figure 4: Average Price per Frame") + ylab("average price ($)") + geom_text(aes(label=mean))
+
+```
+
+As you can see the Carbon bikes are significantly more expensive at the average of $5,339. While the average price of aluminum bike is only $1,979. 
+
+
+
+
+#Conclusion 
+
+The reasearch provided me with a better understanding of the data and the relationships among different variables within the data frame. I was able to identify the most and least expensive bikes along with which category those bikes belonged to. 
+I was able to see the category spread of the bikes and which types of bikes are more expensive. 
+
+The report is also posted here:
+
+https://github.com/polinasorokina/dataanalytics/tree/master/Project
